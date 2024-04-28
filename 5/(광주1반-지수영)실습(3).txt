@@ -1,0 +1,58 @@
+-- P.167
+
+select count(*) "전체건수"
+, COUNT(position) "직책건수"
+, COUNT(distinct POSITION) "직책종류"
+, max(SALARY) "최대"
+, min(SALARY) "최소"
+, avg(SALARY) "평균"
+from cslee.tb_emp;
+
+-- GROUP BY 절
+
+-- P. 169 
+select position "직책",
+COUNT(*) "인원수",
+MIN(SALARY) "최소",
+MAX(SALARY) "최대", 
+avg(SALARY) "평균"
+from cslee.tb_emp
+group by position;
+
+-- HAVING 절
+
+select ORG_CD "부서",
+COUNT(*) "인원수",
+avg(SALARY) "평균"
+from CSLEE.tb_emp
+group by ORG_CD
+having count(*) >= 4;
+
+select ORG_CD, position, AVG(SALARY)
+from CSLEE.tb_emp te 
+where position IN('과장', '대리', '사원')
+group by ORG_CD, position;
+
+select ORG_CD
+	, AVG(case position when '과장' then SALARY END) "과장"
+	, AVG(case position when '대리' then SALARY END) "대리"
+	, AVG(case position when '사원' then SALARY END) "사원"
+from cslee.tb_emp
+where position in ('과장', '대리', '사원')
+group by org_cd;
+
+select ORG_CD,
+SUM(coalesce((case position when '팀장' then 1 else 0 END), 0)) "팀장",
+SUM(coalesce((case position when '과장' then 1 else 0 END), 0)) "과장",
+SUM(coalesce((case position when '대리' then 1 else 0 END), 0)) "대리",
+SUM(coalesce((case position when '사원' then 1 else 0 END), 0)) "사원"
+from cslee.tb_emp
+group by org_cd;
+
+select ORG_CD,
+coalesce (SUM(case position when '팀장' then 1 END), 0) "팀장",
+coalesce (SUM(case position when '과장' then 1 END), 0) "과장",
+coalesce (SUM(case position when '대리' then 1 END), 0) "대리",
+coalesce (SUM(case position when '사원' then 1 END), 0) "사원"
+from cslee.tb_emp
+group by org_cd;

@@ -1,0 +1,150 @@
+-- EQUI JOIN 실습
+
+-- [예제] 사원 테이블과 조직 테이블의 조인 SQL
+select TB_EMP.EMP_NAME, TB_EMP.ORG_CD,
+	TB_ORG.ORG_CD, TB_ORG.ORG_NAME
+from cslee.TB_EMP, cslee.tb_org
+where cslee.tb_emp.org_cd = CSLEE.tb_org.org_cd;
+
+-- [예제] 사원이름, 소속부서코드, 부서명(조직명), 직책을 출력하시오
+select TB_EMP, EMP_NO,
+	TB_EMP.EMP_NAME,
+	TB_EMP.ORG_CD,
+	TB_ORG.ORG_NAME,
+	TB_EMP.position
+from cslee.tb_emp,
+cslee.tb_org
+where cslee.TB_EMP.org_cd = cslee.tb_org.org_cd; -- 조인컬럼
+
+
+-- ALIAS 사용
+select E.EMP_NO,
+E.EMP_NAME,
+E.ORG_CD,
+O.ORG_NAME,
+E.position
+from cslee.tb_emp as E,
+CSLEE.TB_ORG as O
+where E.org_cd = O.org_cd -- 조인컬럼 지정
+and E.position = '팀장'-- 필터조건
+order by O.org_name; -- 정렬
+
+-- [예제] 계좌번호, 고객명, 상품명, 계약금액, 관리자명을 출력한다.
+select A.ACCNO,
+C.CUST_NAME,
+P.PROD_NAME,
+A.CONT_AMT,
+E.EMP_NAME
+from cslee.tb_accnt A, cslee.tb_cust C, cslee.tb_prod P, cslee.tb_emp E
+where A.CUST_NO = C.cust_no 
+and A.prod_cd = P.prod_cd 
+and A.manager = E.emp_no;
+
+-- [예제] 사원별 급여와 어느 등급에 속하는지 알고 싶다는 요구사항에 대한 NON EQUI JOIN
+
+select E.EMP_NAME 사원명,
+E.SALARY 연봉,
+S.GRADE 급여등급
+from cslee.tb_emp E, CSLEE.tb_grade S
+where E.salary 
+between S.low_sal and S.high_sal;
+
+
+-- 표준 조인(ANSI 표현법, ANSI 표현법으로 익히는 것이 좋음)
+-- INNER JOIN
+
+-- [예제] 사원 번호와 사원 이름, 소속부서 코드와 소속부서 이름을 찾아본다.
+
+--(1) where 절 join 조건
+select EMP.EMP_NO, EMP.EMP_NAME, ORG.ORG_NAME
+from cslee.tb_emp EMP, CSLEE.tb_org ORG
+where EMP.org_cd = ORG.org_cd;
+
+--(2) FROM 절 JOIN 조건
+select EMP.EMP_NO, EMP.EMP_NAME, ORG.ORG_NAME
+from CSLEE.tb_emp EMP
+inner join CSLEE.TB_ORG ORG
+on EMP.org_cd = ORG.org_cd;
+
+--(3) INNER 키워드 생략
+select EMP.EMP_NO, EMP.EMP_NAME, ORG.ORG_NAME
+from cslee.TB_EMP EMP
+join cslee.TB_ORG ORG 
+on EMP.ORG_CD = ORG.ORG_CD;
+
+--FROM 절 JOIN 조건
+
+-- [예제] 계좌 테이블에서 계좌번호와, 고객번호, 고객의 명을 고객테이블과 조인하여 찾아본다.
+select ACC.ACCNO, ACC.CUST_NO, CUST.CUST_NAME
+from cslee.tb_accnt acc
+inner join CSLEE.TB_CUST CUST
+on (CUST.CUST_NO = ACC.CUST_NO);
+
+-- FROM 절 JOIN 조건
+
+-- [예제] 조직코드 10인 부서의 소속 사원 이름 및 소속 부서 코드, 부서 코드, 부서 이름을 찾아본다.
+select E.EMP_NAME, E.ORG_CD, O.ORG_CD, O.ORG_NAME
+from CSLEE.tb_emp E
+join CSLEE.tb_org o 
+ON(E.org_cd = O.ORG_CD)
+where E.ORG_CD = '10';
+
+-- ON 조건절 - 다중조인
+
+-- (1) WHERE 절 jOIN 조건
+
+select A.ACCNO 계좌번호, C.CUST_NAME 고객명, P.PROD_NAME 상품명,
+A.CONT_AMT 계약금액, E.EMP_NAME 담당자명
+from CSLEE.TB_ACCNT A, cslee.tb_cust C, cslee.tb_prod P, cslee.tb_emp E
+where A.cust_no = C.cust_no 
+and A.prod_cd = P.prod_cd 
+and A.manager = E.emp_no;
+
+-- (2) ON절 JOIN 조건
+select A.ACCNO 계좌번호, C.CUST_NAME 고객명, P.PROD_NAME 상품명, A.CONT_AMT 계약번호, E.EMP_NAME 담당자명
+from CSLEE.tb_accnt A
+inner join CSLEE.tb_cust C on A.cust_no = C.cust_no 
+inner join cslee.tb_prod P on A.prod_cd = P.prod_cd 
+inner join cslee.tb_emp E on A.manager = E.emp_no;
+
+-- CROSS 조인 (몇 개의 데이터가 나올지 미리 예측해ㅐ보세요)
+select COUNT(EMP_NAME) from cslee.tb_emp;
+select COUNT(ORG_NAME) from cslee.tb_org;
+
+select E.EMP_NAME, O.ORG_NAME
+from cslee.tb_emp E cross join cslee.TB_ORG o 
+order by emp_name;
+
+select COUNT(E.EMP_NAME)
+from cslee.tb_emp E cross join cslee.tb_org O;
+
+-- LEFT OUTER JOIN 조인(몇개의 데이터가 나올지 미리 예측해보세요) 
+-- [예제] 직원중에 아직 부서배정이 안된 사원도 있다. 사원 (TB_EMP)와 조직 (TB_ORG)을 JOIN 하되
+부서 배정이 안된 사원의 정보도 같이 출력하도록 한다.
+
+select E.EMP_NO 사번, E.EMP_NAME 사원명,
+E.position 직책, O.ORG_NAME 부서명
+from cslee.tb_emp E left outer join cslee.tb_org o 
+on E.org_cd = O.ORG_CD
+where E.position = '사원';
+
+-- RIGHT OUTER JOIN
+
+-- [예제] 이전 예제에서 LEFT JOIN을 OUTER JOIN으로 표현한다.
+select E.EMP_NO 사번, E.EMP_NAME 사원명, E.position 직책, O.ORG_NAME 부서명
+from cslee.tb_org O right outer join CSLEE.TB_EMP E
+on E.org_cd = O.org_cd 
+where E.position = '사원';
+
+-- FULL OUTER JOIN
+select A.ORG_CD, A.ORG_NAME, B.ORG_CD, B.ORG_NAME
+from CSLEE.tb_org A full outer join cslee.tb_org B 
+on A.org_cd = B.org_cd;
+
+select A.ORG_CD, A.ORG_NAME, B.ORG_CD, B.ORG_NAME
+from cslee.tb_org A left outer join cslee.tb_org B 
+on A.org_cd = B.org_cd 
+union 
+select A.org_cd, A.org_name, B.org_cd, B.org_name 
+from cslee.tb_org A right outer join cslee.tb_org B 
+on A.ORG_CD = B.org_cd;
